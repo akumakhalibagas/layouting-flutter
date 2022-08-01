@@ -9,10 +9,14 @@ class OnboardingItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Image(
-          image: AssetImage(images!),
-          width: 250,
-          fit: BoxFit.cover,
+        Padding(
+          padding: const EdgeInsets.only(top: 12),
+          child: Image(
+            image: AssetImage(images!),
+            width: 225,
+            height: 225,
+            fit: BoxFit.fill,
+          ),
         ),
         Padding(
           padding: const EdgeInsets.only(top: 50),

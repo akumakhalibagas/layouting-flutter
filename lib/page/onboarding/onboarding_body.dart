@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_layouting/page/components/appbar_chakra.dart';
-import 'package:flutter_layouting/page/components/primary_button.dart';
+import 'package:flutter_layouting/components/appbar.dart';
+import 'package:flutter_layouting/components/primary_button.dart';
+import 'package:flutter_layouting/page/login/login_page.dart';
 import 'package:flutter_layouting/page/onboarding/onboarding_item.dart';
+import 'package:flutter_layouting/page/register/register_page.dart';
+import 'package:page_view_indicators/circle_page_indicator.dart';
 
 class OnboardingBody extends StatefulWidget {
   const OnboardingBody({Key? key}) : super(key: key);
@@ -11,7 +14,8 @@ class OnboardingBody extends StatefulWidget {
 }
 
 class _OnboardingBodyState extends State<OnboardingBody> {
-  int currentPage = 0;
+  final _currentPageNotifier = ValueNotifier<int>(0);
+  var _isLastPage = false;
   PageController controller = PageController(initialPage: 0);
   List<Map<String, String>> listOnboarding = [
     {
@@ -35,78 +39,74 @@ class _OnboardingBodyState extends State<OnboardingBody> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      child: Container(
-        color: Colors.white,
-        child: Column(
-          children: [
-            const AppBarChakra(),
-            Expanded(
-                flex: 3,
-                child: PageView.builder(
-                  controller: controller,
-                  onPageChanged: (values) {
-                    setState(() {
-                      currentPage = values;
-                    });
-                  },
-                  itemBuilder: (context, i) {
-                    return OnboardingItem(
-                        images: listOnboarding[i]["images"],
-                        title: listOnboarding[i]["title"],
-                        subtitle: listOnboarding[i]["subtitle"]);
-                  },
+    return Container(
+      color: Colors.white,
+      child: Column(
+        children: [
+          const AppBarChakra(),
+          Expanded(
+              flex: 3,
+              child: PageView.builder(
+                controller: controller,
+                onPageChanged: (values) {
+                  setState(() {
+                    _currentPageNotifier.value = values;
+                    _isLastPage =
+                        _currentPageNotifier.value == listOnboarding.length - 1;
+                  });
+                },
+                itemBuilder: (context, i) {
+                  return OnboardingItem(
+                      images: listOnboarding[i]["images"],
+                      title: listOnboarding[i]["title"],
+                      subtitle: listOnboarding[i]["subtitle"]);
+                },
+                itemCount: listOnboarding.length,
+              )),
+          Expanded(
+            child: Column(
+              children: [
+                CirclePageIndicator(
+                  currentPageNotifier: _currentPageNotifier,
                   itemCount: listOnboarding.length,
-                )),
-            Expanded(
-                flex: 1,
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: List.generate(listOnboarding.length,
-                          (index) => initDot(index: index)),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 30, 20, 20),
-                      child: PrimaryButton(
-                        text: "Next",
-                        press: () {
-                          controller.animateToPage(currentPage,
+                  size: 10,
+                  selectedSize: 10,
+                  dotColor: const Color.fromARGB(255, 184, 185, 185),
+                  selectedDotColor: const Color.fromRGBO(8, 192, 255, 1),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 30, 20, 20),
+                  child: PrimaryButton(
+                    text: _isLastPage ? 'Create your accout' : 'Next',
+                    press: () {
+                      _isLastPage
+                          ? Navigator.pushNamed(context, RegisterPage.routeName)
+                          : controller.animateToPage(
+                              _currentPageNotifier.value + 1,
                               duration: const Duration(milliseconds: 200),
-                              curve: Curves.linear);
-                        },
+                              curve: Curves.bounceOut);
+                    },
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text("Already have an account? "),
+                    InkWell(
+                      onTap: () {
+                        Navigator.pushNamed(context, LoginPage.routeName);
+                      },
+                      child: const Text(
+                        " Sign in",
+                        style: TextStyle(color: Color.fromRGBO(8, 192, 255, 1)),
                       ),
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
-                        Text("Already have an account? "),
-                        Text(
-                          " Sign in",
-                          style:
-                              TextStyle(color: Color.fromRGBO(8, 192, 255, 1)),
-                        )
-                      ],
                     )
                   ],
-                ))
-          ],
-        ),
-      ),
-    );
-  }
-
-  AnimatedContainer initDot({int? index}) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      margin: const EdgeInsets.only(right: 5),
-      height: 6,
-      width: currentPage == index ? 20 : 6,
-      decoration: BoxDecoration(
-        color: currentPage == index ? Colors.blue : Colors.grey,
-        borderRadius: BorderRadius.circular(3),
+                )
+              ],
+            ),
+          )
+        ],
       ),
     );
   }
