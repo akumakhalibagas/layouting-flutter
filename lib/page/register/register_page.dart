@@ -119,7 +119,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   Column(
                     children: [
                       const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        padding: EdgeInsets.all(16),
                         child: Text(
                           'By continuing, you agree to Chakra’s Term & Condition and Privacy Policy',
                           style: TextStyle(
